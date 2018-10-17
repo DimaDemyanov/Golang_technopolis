@@ -1,14 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+)
 
-func swap(arr []float64, i int, j int) {
+func swap(arr []int, i int, j int) {
 	c := arr[i]
 	arr[i] = arr[j]
 	arr[j] = c
 }
 
-func sort(arr []float64, n int) {
+func sort(arr []int, n int) {
 	for i := 0; i < n; i++ {
 		for j := i; j < n; j++ {
 			if arr[i] > arr[j] {
@@ -19,14 +24,30 @@ func sort(arr []float64, n int) {
 }
 
 func main() {
-	length := 0
-	fmt.Println("Enter the number of inputs")
-	fmt.Scan(&length)
-	fmt.Println("Enter the inputs")
-	numbers := make([]float64, length)
-	for i := 0; i < length; i++ {
-		fmt.Scan(&numbers[i])
+	filePathIn := "stdin"
+	filePathOut := "stdout"
+	fd, err := os.Open(filePathIn)
+	if err != nil {
+		panic(fmt.Sprintf("open %s: %v", filePathIn, err))
 	}
-	sort(numbers, length)
-	fmt.Println(numbers)
+	scanner := bufio.NewScanner(fd)
+	scanner.Split(bufio.ScanWords)
+	var result []int
+	for scanner.Scan() {
+		x, _ := strconv.Atoi(scanner.Text())
+		result = append(result, x)
+	}
+	sort(result, len(result))
+	f, err := os.Create(filePathOut) // creating...
+	if err != nil {
+		fmt.Printf("error creating file: %v", err)
+		return
+	}
+	defer f.Close()
+	for i := 0; i < len(result); i++ { // Generating...
+		_, err = f.WriteString(fmt.Sprintf("%d ", i)) // writing...
+		if err != nil {
+			fmt.Printf("error writing string: %v", err)
+		}
+	}
 }
